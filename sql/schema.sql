@@ -14,6 +14,7 @@ CREATE TABLE `catalogo` (
 `store_view_code` varchar(30),
 `attribute_set_code` varchar(20),
 `product_type` varchar(30),
+`product_kind` varchar(30),
 `categories` varchar(80),
 `product_websites` varchar(30),
 `brand` varchar(64),
@@ -56,6 +57,8 @@ CREATE TABLE `catalogo` (
 `page_layout` varchar(30),
 `product_options_container` varchar(30),
 `msrp_display_actual_price_type` varchar(30),
+`market_type` varchar(64), --added
+`manufacturer` varchar(64), --added
 `country_of_manufacture` varchar(64),
 `additional_attributes` varchar(255),
 `qty` decimal,
@@ -76,7 +79,7 @@ CREATE TABLE `catalogo` (
 `use_config_qty_increments` decimal,
 `qty_increments` varchar(4),
 `use_config_enable_qty_inc` decimal,
-`enable_qty_increments` decimal,
+`enable_qty_increments`          decimal,
 `is_decimal_divided`  varchar(255),
 `website_id` varchar(255),
 `related_skus`  TEXT(1024),
@@ -97,7 +100,9 @@ CREATE TABLE `catalogo` (
 `bundle_shipment_type` varchar(255),
 `associated_skus` varchar(255),
 `configurable_variations` varchar(255),
-`configurable_variation_labels` varchar(255)
+`configurable_variation_labels` varchar(255),
+`unit`  varchar(4), --added
+`order_unit`  varchar(4), --added
 );
 
 -- Indexes for dumped tables
