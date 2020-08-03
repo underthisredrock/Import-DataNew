@@ -26,7 +26,7 @@ class DataSource
 
     const PASSWORD = '';
 
-    const DATABASENAME = 'import_data';
+    const DATABASENAME = 'chiara_import';
 
     private $conn;
 
@@ -103,10 +103,16 @@ class DataSource
      */
     public function insert($query, $paramType, $paramArray)
     {
+  
         $stmt = $this->conn->prepare($query);
         $this->bindQueryParams($stmt, $paramType, $paramArray);
+        try {
+                    $stmt->execute();
+        } catch (Exception $exc) {
+            echo $exc->getTraceAsString();
+        }
 
-        $stmt->execute();
+
         $insertId = $stmt->insert_id;
         return $insertId;
     }

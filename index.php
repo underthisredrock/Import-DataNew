@@ -4,13 +4,11 @@ use League\Csv\Reader;
 use League\Csv\Writer;
 require_once 'functions.php';
 require_once 'DataSource.php';
-
-$db = new DataSource();
-$conn = $db->getConnection();
-$fileName = "C:\wamp64\www\Import-Data\Template\sitemapit.txt";
-
         
-
+global $db;
+$db= new DataSource();
+$conn = $db->getConnection();  
+ini_set('max_execution_time', 300);
 ?>
 <!DOCTYPE html>
 <html>
@@ -105,25 +103,15 @@ $(document).ready(function() {
 </head>
 
 <body>
-    <h2>Import Data/h2>
+    <h2>Import Data</h2>
         <p>
 
         <div id=files">
                <?php
-                $file = fopen($fileName, "r") or die("File does not exist or you lack permission to open it");
-                $line= fgets($file);
-                $i=0;
-                while (!feof($file) and $i<30)
-                {
-                     $i++;
-                     print ("$i,$line<br>");
-                     ProcessLine3($line);
-                     //ProcessLine1($line);
-                     //ProcessLine2($line);
-                     $line = fgets($file);
-
-                }
-                fclose($file);
+               ProcessBrandFile($db, "C:\wamp64\www\Import-DataNew\Template\brand - ITA.txt", "it");
+               ProcessBrandFile($db, "C:\wamp64\www\Import-DataNew\Template\brand - ENG.txt", "en");
+               ProcessCategoryFile($db, "C:\wamp64\www\Import-DataNew\Template\cat - ITA.txt", "it");
+               // non esistono descrizioni di categorie in inglese - ProcessCategoryFile($db, "C:\wamp64\www\Import-DataNew\Template\cat - ENG.txt", "en");
                 ?>
         </div>
     </p>

@@ -1,126 +1,196 @@
 <?php
 
-include('simple_html_dom.php');
- 
-// get DOM from URL or file
-// $html = file_get_html('http://www.google.com/');
 
-// find all link
-// foreach($html->find('a') as $e) 
-//     echo $e->href . '<br>';
+function ProcessBrandFile($db, $fileName, $language){
+    $file = fopen($fileName, "r") or die("File does not exist or you lack permission to open it");
+    $line= fgets($file);
+    $i=0;
+    while (!feof($file))
+    {
+         $i++;
+         ProcessBrands($line,$db, $language);
+         echo "<p>" . $i . " " . $line . "</p>" ;
+         $line = fgets($file);
 
-// find all image
-// foreach($html->find('img') as $e)
-//     echo $e->src . '<br>';
+    }
+    fclose($file);
+  }
+function ProcessCategoryFile($db, $fileName, $language){
+    $file = fopen($fileName, "r") or die("File does not exist or you lack permission to open it");
+    $line= fgets($file);
+    $i=0;
+    while (!feof($file))
+    {
+         $i++;
+         ProcessCategories($line,$db,$language);
+         echo "<p>" . $i . " " . $line . "</p>" ;
+         $line = fgets($file);
+    }
+    fclose($file);
 
-// find all image with full tag
-// foreach($html->find('img') as $e)
-//     echo $e->outertext . '<br>';
+} 
+function ProcessCategories($path,$db,$language){
+// category title: /html/body/div[2]/div[3]/div[3]/div[2]/div[1]/div[3]/div/div[1]/div/h1
+// category content copllapsed: /html/body/div[2]/div[3]/div[3]/div[2]/div[1]/div[3]/div/div[2]/div/div/div/p[1]
+// category content full: //*[@id="col-annot-ca-box-0"] o //*[@id="col-annot"]
 
-// find all div tags with id=gbar
-// foreach($html->find('div#gbar') as $e)
-//     echo $e->innertext . '<br>';
-
-// find all span tags with class=gb1
-// foreach($html->find('span.gb1') as $e)
-//     echo $e->outertext . '<br>';
-
-// find all td tags with attribite align=center
-// foreach($html->find('td[align=center]') as $e)
-//     echo $e->innertext . '<br>';
-    
-// extract text from table
-// echo $html->find('td[align="center"]', 1)->plaintext.'<br><hr>';
-
-// extract text from HTML
-// echo $html->plaintext;
-
-// ProcessLine non funziona perchè non trova il testo dello script
-function ProcessLine($path){
-    $filename = trim($path)."index.html";
-    $html = file_get_html($filename);
-    $a = $html->find('script#__APOLLO_STATE__');
-    $script=$a->plaintext;
-    echo $script;
-}
-
-// ProcessLine1 non funziona perchè non trova il testo dello script
-function ProcessLine1($path){
-    $filename = trim($path)."index.html";
+    $filename = trim($path);
     $doc = new DOMDocument();
-    $doc->loadHTMLFile($filename);
+    libxml_use_internal_errors(true);
+
+# The @ before the method call suppresses any warnings that
+# loadHTML might throw because of invalid HTML in the page.
+    @$doc->loadHTMLFile($filename, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     $xpath = new DOMXpath($doc);
+    
+    //VAR_DUMP(get_links($filename));
+    $categoryId ="";
+    $metaTitle="";
+    $metaKeywords="";
+    $metaDescription="";
+    $URLKey="";
+    $categoryCZ="";
+    $categoryName="";
+    $smallImage="";
+    $image="";
+    $description ="";
+    $summary ="";
+    
 
 
-    $elements = $xpath->query("//*[@id='__APOLLO_STATE__']");
+    $elements=null;
+    $elements = $xpath->query("//meta");
+    if (count($elements)>7) {  
+        $tStr= $elements[8]->getAttribute('content');
+        if (!is_null($tStr)) {
+            $URLKey= str_replace('http://it.k8s.notino.local', '', $tStr);
+        }    
+    } 
+    $metaTitle=$categoryId=$categoryName= str_replace("/", '', $URLKey);
+    $metaKeywords= $elements[0]->getAttribute('content');
+    $metaDescription= $elements[1]->getAttribute('content');
+    
+    $elements = $xpath->query("//*[@id='col-annot']/*[@class='ca-box']"); 
     if (!is_null($elements)) {
       foreach ($elements as $element) {
-        $nodeName= $element->nodeValue;
-               
-        $nodes = $element->childNodes;
-        foreach ($nodes as $node) {
-          echo $node->nodeValue. "\n"; //nodeValue fallisce perchè la stringa è troppo lunga
-          echo $node->nodeName. "\n";
-        }
+          $description= str_replace("Notino.it", 'Market Erniani',$element->nodeValue);
       }
     }
+  
+    $elements=null;
+    $elements = $xpath->query('/html/head/script[2]');
+    if (!is_null($elements)) {
+      foreach ($elements as $element) {
+        $tStr= $element->nodeValue;
+        $start=strrpos($tStr, '"page":{"type":"Category","description":"', 0);
+        $strlen=strlen('"page":{"type":"Category","description":"');
+        $newstart=$start+$strlen;
+        $tStr=substr($tStr,$newstart,(strlen($tStr)-$newstart));
+        $end=strpos($tStr, '}');
+        $categoryCZ=substr($tStr, 0, $end-1);
+      }
+    }   
+           
+       
+    $sqlInsert = "INSERT INTO `categories`(`categoryId`, `metaTitle`, `metaKeywords`, `metaDescription`, `categoryCZ`, `categoryName`, `URLKey`, `language`, `smallImage`, `image`, `description`, `summary`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+    $paramType = "ssssssssssss";
+    $paramArray = array( $categoryId, $metaTitle, $metaKeywords, $metaDescription, $categoryCZ, $categoryName, $URLKey, $language, $smallImage, $image, $description, $summary);
+    $insertId = $db->insert($sqlInsert, $paramType, $paramArray);
+
+    if (! empty($insertId)) {
+        $type = "success";
+        $message = "Data Imported into the Database";
+    } else {
+        $type = "error";
+        $message = "Problem in Importing Data";
+    }
+    
 }
 
-// ProcessLine1 non funziona perchè non trova il testo dello script
-function ProcessLine2($path){
-    $filename = trim($path)."index.html";
-    try {
-        $handle = fopen($filename, "r");
-        $contents = fread($handle, filesize($filename));
-    } catch (Exception $e) {
-        echo 'Caught exception: ',  $e->getMessage(), "\n";
+function ProcessBrands($path,$db,$language){
+// category title: /html/body/div[2]/div[3]/div[3]/div[2]/div[1]/div[3]/div/div[1]/div/h1
+// category content copllapsed: /html/body/div[2]/div[3]/div[3]/div[2]/div[1]/div[3]/div/div[2]/div/div/div/p[1]
+// category content full: //*[@id="col-annot-ca-box-0"] o //*[@id="col-annot"]
+
+    $filename = trim($path);
+    $doc = new DOMDocument();
+    @$doc->loadHTMLFile($filename);
+    $xpath = new DOMXpath($doc);
+    
+    $brandId="";
+    $URLKey=""; 
+    $metaKeywords="";
+    $metaDescription="";
+    $smallImage="";
+    $image="";
+    $description ="";
+    $longDescription ="";
+    $summary ="";
+    $sortorder =0;
+    $featuredBrand ="";
+    $storeView ="";
+    
+
+    $elements=null;
+    $elements = $xpath->query("//meta");
+    if (count($elements)>7) {  
+        $tStr= $elements[8]->getAttribute('content');
+        if (!is_null($tStr)) {
+            $URLKey= str_replace('http://it.k8s.notino.local', '', $tStr);
+        } else {
+          print $filename;  
+        }    
+    } else {
+      print $filename;  
+    } 
+    $URLKey= str_replace('http://it.k8s.notino.local', '', $elements[8]->getAttribute('content'));
+    $metaTitle=$brandId= str_replace("/", '', $URLKey);
+    $metaKeywords= $elements[0]->getAttribute('content');
+    $metaDescription= $elements[1]->getAttribute('content');
+    
+    $elements = $xpath->query("//*[@class='text-brand-text collapsable']/*[@class='ca-box']"); 
+    if (!is_null($elements)) {
+      foreach ($elements as $element) {
+          $description= str_replace("Notino.it", 'Market Erniani',$element->nodeValue);
+          $featuredBrand="Yes";
+      }
+    }
+    $elements = $xpath->query("//*[@class='category-component category-component--seo-text collapsable']/*[@class='component-title center']");
+    if (!is_null($elements)) {
+      foreach ($elements as $element) {
+        $longDescriptionTitle= $element->nodeValue;
+      }
     }  
-    //echo $contents;
-    fclose($handle);
-    
-    $apollo="";
-    preg_match_all('#<script(.*?)<\/script>#ims', $contents, $outs);
-    $n= count ($outs);
-    if ($n>=1) {
-    echo $n ."<br/>";
-    foreach ($outs[0] as $out) {
-       $apollo = implode('',$outs[0]);
-        echo $apollo;
-    }}
-
-}
-
-// ProcessLine1 non funziona perchè non trova il testo dello script
-function ProcessLine3($path){
-    $filename = trim($path)."index.html";
-    $doc = new DOMDocument();
-    $doc->loadHTMLFile($filename);
-    $xpath = new DOMXpath($doc);
-
-//*[@id="pdHeader"]/h1
-    
-    $elements = $xpath->query("//*[@id=\"pdHeader\"]/h1/span[2]");
-    //class="styled__TextNormal-aohf13-6 cnjxne"
+    $elements = $xpath->query("//*[@class='category-component category-component--seo-text collapsable']/*[@class='ca-box']");
     if (!is_null($elements)) {
       foreach ($elements as $element) {
-        $nodeName= $element->nodeName;
-        $nodeValue= $element->nodeValue; 
-        $nodes = $element->childNodes;
-        foreach ($nodes as $node) {
-          echo $node->nodeValue. "\n"; //nodeValue fallisce perchè la stringa è troppo lunga
-          echo $node->nodeName. "\n";
-        }
+        $longDescription= $element->nodeValue;
       }
     }
+  
+    $elements = $xpath->query("//*[@class='component-title']/img/attribute::src"); 
+    if (!is_null($elements)) {
+      foreach ($elements as $element) {
+         $image = $element->value;
+        }
+    }
+       
+    $sqlInsert = "INSERT INTO `brands`(`brandId`, `URLKey`, `metaKeywords`, `metaDescription`, `language`, `description`, `longDescription`, `summary`, `sortorder`, `smallImage`, `image`, `featuredBrand`, `storeView`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    $paramType = "ssssssssdssss";
+    $paramArray = array($brandId, $URLKey, $metaKeywords, $metaDescription, $language, $description, $longDescription, $summary, $sortorder, $smallImage, $image, $featuredBrand, $storeView);
+        
+    $insertId = $db->insert($sqlInsert, $paramType, $paramArray);
+
+    if (! empty($insertId)) {
+        $type = "success";
+        $message = "Data Imported into the Database";
+    } else {
+        $type = "error";
+        $message = "Problem in Importing Data";
+    }
+    
 }
 
-function utf8_fopen_read($fileName) {
-    $fc = iconv('windows-1250', 'utf-8//TRANSLIT', file_get_contents($fileName));
-    $handle=fopen("php://memory", "rw");
-    fwrite($handle, $fc);
-    fseek($handle, 0);
-    return $handle;
-}
 
 function get_all_records(){
     $con = getdb();
@@ -166,6 +236,26 @@ function get_all_records(){
       }  
       fclose($output);  
  }  
+}
+
+function get_links($url) {
+
+    // Create a new DOM Document to hold our webpage structure
+    $xml = new DOMDocument();
+
+    // Load the url's contents into the DOM
+    $xml->loadHTMLFile($url);
+
+    // Empty array to hold all links to return
+    $links = array();
+
+    //Loop through each <a> tag in the dom and add it to the link array
+    foreach($xml->getElementsByTagName('a') as $link) {
+        $links[] = array('url' => $link->getAttribute('href'), 'text' => $link->nodeValue);
+    }
+
+    //Return the links
+    return $links;
 }
 
  ?>
