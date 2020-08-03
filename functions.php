@@ -15,6 +15,7 @@ function ProcessBrandFile($db, $fileName, $language){
     }
     fclose($file);
   }
+  
 function ProcessCategoryFile($db, $fileName, $language){
     $file = fopen($fileName, "r") or die("File does not exist or you lack permission to open it");
     $line= fgets($file);
@@ -87,8 +88,12 @@ function ProcessCategories($path,$db,$language){
         $newstart=$start+$strlen;
         $tStr=substr($tStr,$newstart,(strlen($tStr)-$newstart));
         $end=strpos($tStr, '}');
-        $categoryCZ=substr($tStr, 0, $end-1);
-      }
+        $test=strpos($tStr, 'ate(');
+        if (!$test>0) {
+         $categoryCZ=substr($tStr, 0, $end-1);
+        }
+      
+       }
     }   
            
        
@@ -125,7 +130,9 @@ function ProcessBrands($path,$db,$language){
     $image="";
     $description ="";
     $longDescription ="";
+    $longDescriptionTitle ="";
     $summary ="";
+    $master ="";
     $sortorder =0;
     $featuredBrand ="";
     $storeView ="";
@@ -144,7 +151,17 @@ function ProcessBrands($path,$db,$language){
       print $filename;  
     } 
     $URLKey= str_replace('http://it.k8s.notino.local', '', $elements[8]->getAttribute('content'));
-    $metaTitle=$brandId= str_replace("/", '', $URLKey);
+    $len=strlen($URLKey);
+    $tStr=substr($URLKey, 1, ($len-2));
+    $pos=0;
+    $pos=strpos($tStr, '/');
+    $len=strlen($tStr);
+    $metaTitle=$brandId=$tStr;
+    if ($pos>0 and $len > $pos) {
+        $master="no";
+    } else {
+        $master="yes";
+    }
     $metaKeywords= $elements[0]->getAttribute('content');
     $metaDescription= $elements[1]->getAttribute('content');
     
@@ -175,9 +192,9 @@ function ProcessBrands($path,$db,$language){
         }
     }
        
-    $sqlInsert = "INSERT INTO `brands`(`brandId`, `URLKey`, `metaKeywords`, `metaDescription`, `language`, `description`, `longDescription`, `summary`, `sortorder`, `smallImage`, `image`, `featuredBrand`, `storeView`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
-    $paramType = "ssssssssdssss";
-    $paramArray = array($brandId, $URLKey, $metaKeywords, $metaDescription, $language, $description, $longDescription, $summary, $sortorder, $smallImage, $image, $featuredBrand, $storeView);
+    $sqlInsert = "INSERT INTO `brands`(`brandId`, `URLKey`, `metaKeywords`, `metaDescription`, `language`, `description`, `longDescription`, `longDescriptionTitle`,`summary`, `sortorder`, `smallImage`, `image`, `featuredBrand`, `master`, `storeView`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    $paramType = "sssssssssdsssss";
+    $paramArray = array($brandId, $URLKey, $metaKeywords, $metaDescription, $language, $description, $longDescription, $longDescriptionTitle, $summary, $sortorder, $smallImage, $image, $featuredBrand, $master, $storeView);
         
     $insertId = $db->insert($sqlInsert, $paramType, $paramArray);
 
@@ -190,6 +207,7 @@ function ProcessBrands($path,$db,$language){
     }
     
 }
+
 
 
 function get_all_records(){

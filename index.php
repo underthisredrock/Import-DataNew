@@ -108,10 +108,11 @@ $(document).ready(function() {
 
         <div id=files">
                <?php
+
                ProcessBrandFile($db, "C:\wamp64\www\Import-DataNew\Template\brand - ITA.txt", "it");
                ProcessBrandFile($db, "C:\wamp64\www\Import-DataNew\Template\brand - ENG.txt", "en");
                ProcessCategoryFile($db, "C:\wamp64\www\Import-DataNew\Template\cat - ITA.txt", "it");
-               // non esistono descrizioni di categorie in inglese - ProcessCategoryFile($db, "C:\wamp64\www\Import-DataNew\Template\cat - ENG.txt", "en");
+             // non esistono descrizioni di categorie in inglese - ProcessCategoryFile($db, "C:\wamp64\www\Import-DataNew\Template\cat - ENG.txt", "en");
                 ?>
         </div>
     </p>

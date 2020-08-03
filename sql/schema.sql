@@ -50,7 +50,6 @@ ALTER TABLE `categories`
 --
 
 -- --------------------------------------------------------
-
 --
 -- Table structure for table `brands`
 --
@@ -71,6 +70,7 @@ CREATE TABLE `brands` (
 `smallImage` varchar(255),
 `image` varchar(255),
 `featuredBrand` varchar(10),
+`master` varchar(10),
 `storeView` varchar(10)
 );
 
@@ -92,3 +92,4 @@ ALTER TABLE `brands`
 --
 ALTER TABLE `brands`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
