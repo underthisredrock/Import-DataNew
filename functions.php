@@ -88,28 +88,25 @@ function ProcessCategories($path,$db,$language){
         $newstart=$start+$strlen;
         $tStr=substr($tStr,$newstart,(strlen($tStr)-$newstart));
         $end=strpos($tStr, '}');
-        $test=strpos($tStr, 'ate(');
+        $test=strpos($tStr, 'te(');
         if (!$test>0) {
          $categoryCZ=substr($tStr, 0, $end-1);
+            $sqlInsert = "INSERT INTO `categories`(`categoryId`, `metaTitle`, `metaKeywords`, `metaDescription`, `categoryCZ`, `categoryName`, `URLKey`, `language`, `smallImage`, `image`, `description`, `summary`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
+            $paramType = "ssssssssssss";
+            $paramArray = array( $categoryId, $metaTitle, $metaKeywords, $metaDescription, $categoryCZ, $categoryName, $URLKey, $language, $smallImage, $image, $description, $summary);
+            $insertId = $db->insert($sqlInsert, $paramType, $paramArray);
+
+            if (! empty($insertId)) {
+                $type = "success";
+                $message = "Data Imported into the Database";
+            } else {
+                $type = "error";
+                $message = "Problem in Importing Data";
+            }
         }
       
        }
     }   
-           
-       
-    $sqlInsert = "INSERT INTO `categories`(`categoryId`, `metaTitle`, `metaKeywords`, `metaDescription`, `categoryCZ`, `categoryName`, `URLKey`, `language`, `smallImage`, `image`, `description`, `summary`) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
-    $paramType = "ssssssssssss";
-    $paramArray = array( $categoryId, $metaTitle, $metaKeywords, $metaDescription, $categoryCZ, $categoryName, $URLKey, $language, $smallImage, $image, $description, $summary);
-    $insertId = $db->insert($sqlInsert, $paramType, $paramArray);
-
-    if (! empty($insertId)) {
-        $type = "success";
-        $message = "Data Imported into the Database";
-    } else {
-        $type = "error";
-        $message = "Problem in Importing Data";
-    }
-    
 }
 
 function ProcessBrands($path,$db,$language){
