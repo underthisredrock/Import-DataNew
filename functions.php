@@ -23,7 +23,7 @@ function ProcessCategoryFile($db, $fileName, $language){
     while (!feof($file))
     {
          $i++;
-         ProcessCategories($line,$db,$language);
+         ProcessCategories($line,$db,$language );
          echo "<p>" . $i . " " . $line . "</p>" ;
          $line = fgets($file);
     }
