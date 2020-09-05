@@ -1,4 +1,7 @@
 <?php
+
+// Chiara: Import Brand and categories for analysis
+
 use Phppot\DataSource;
 use League\Csv\Reader;
 use League\Csv\Writer;
@@ -110,8 +113,8 @@ $(document).ready(function() {
                <?php
 
                ProcessBrandFile($db, "C:\wamp64\www\Import-DataNew\Template\brand - ITA.txt", "it");
-               ProcessBrandFile($db, "C:\wamp64\www\Import-DataNew\Template\brand - ENG.txt", "en");
-               ProcessCategoryFile($db, "C:\wamp64\www\Import-DataNew\Template\cat - ITA.txt", "it");
+               //ProcessBrandFile($db, "C:\wamp64\www\Import-DataNew\Template\brand - ENG.txt", "en");
+               //ProcessCategoryFile($db, "C:\wamp64\www\Import-DataNew\Template\cat - ITA.txt", "it");
              // non esistono descrizioni di categorie in inglese - ProcessCategoryFile($db, "C:\wamp64\www\Import-DataNew\Template\cat - ENG.txt", "en");
                 ?>
         </div>
