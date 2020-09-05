@@ -5,7 +5,7 @@ function ProcessBrandFile($db, $fileName, $language){
     $file = fopen($fileName, "r") or die("File does not exist or you lack permission to open it");
     $line= fgets($file);
     $i=0;
-    while (!feof($file))
+    while (!feof($file) )
     {
          $i++;
          ProcessBrands($line,$db, $language);
